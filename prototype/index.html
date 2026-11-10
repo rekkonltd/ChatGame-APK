@@ -8,6 +8,22 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
+<script>
+/* Мини-полифиллы для старых Android WebView (Chrome < 57) */
+if (!String.prototype.padStart) {
+  String.prototype.padStart = function (len, pad) {
+    var s = String(this); pad = pad === undefined ? ' ' : String(pad);
+    while (s.length < len) s = pad + s;
+    return s;
+  };
+}
+if (!Object.entries) {
+  Object.entries = function (o) {
+    var out = []; for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) out.push([k, o[k]]);
+    return out;
+  };
+}
+</script>
 </head>
 <body>
 

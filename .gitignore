@@ -7,3 +7,6 @@ godot/.godot/
 # служебное
 .DS_Store
 Thumbs.db
+
+# промежуточные файлы сборки APK
+android-native/build/

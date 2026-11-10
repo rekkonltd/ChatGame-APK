@@ -3,7 +3,7 @@
 Мобильная RTS в духе *Thandor: The Invasion* (2000): одна карта, экономика на ксените,
 две ветки технологий, полуавтоматический бой. Портрет, одна рука.
 
-**Статус:** играбельный прототип одного уровня + основа проекта Godot для APK.
+**Статус:** играбельный прототип одного уровня + собранный тестовый APK + основа проекта Godot.
 
 ---
 
@@ -16,6 +16,9 @@
 | **`docs/screens/`** | отрендеренные экраны прототипа (PNG 390×844) |
 | **`prototype/`** | играбельный веб-прототип: HTML5 Canvas + JS, без зависимостей |
 | **`godot/`** | проект Godot 4.3: экспорт в APK, та же логика на GDScript |
+| **`artifacts/`** | **готовый APK** для установки на телефон |
+| **`android-native/`** | нативная оболочка APK: манифест, `MainActivity.java`, иконка |
+| **`tools/build-apk.sh`** | сборка APK одной командой (aapt2 + d8 + apksigner, без Gradle) |
 | **`tools/render-screens.js`** | рендер экранов в PNG для превью и проверки вёрстки |
 
 ---
@@ -46,10 +49,23 @@ node prototype/test/sim.test.js
 
 ---
 
-## Собрать APK
+## Установить тестовый APK
+
+```bash
+adb install -r artifacts/thandor-debug-0.1.0.apk
+```
+
+Или просто скинуть файл на телефон и открыть. Package `com.thandor.vtorzhenie`,
+Android 5.0+, портрет, 226 КБ. Подробности и пересборка — `android-native/README.md`.
+
+> Это WebView-оболочка с тем же прототипом внутри — быстрый способ пощупать игру
+> на реальном экране. Целевая сборка на Godot — ниже.
+
+## Собрать релизный APK на Godot
 
 См. `godot/README.md`. Коротко: Godot 4.3 → Import `godot/project.godot` → установить
 Android Build Template → Project → Export → Android (arm64-v8a) → `build/thandor.apk`.
+Нужен полный Android SDK с NDK; в отличие от тестовой сборки, здесь без него не обойтись.
 
 ---
 

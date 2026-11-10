@@ -215,19 +215,21 @@ canvas#game {
   html, body { overflow: auto; }
   .stage { flex-direction: column; padding: 0; gap: 0; height: auto; }
   .side { display: none; }
-  .phoneWrap { height: 100dvh; justify-content: flex-start; gap: 0; }
+  .phoneWrap { height: 100vh; height: 100dvh; justify-content: flex-start; gap: 0; }
   .phone {
     padding: 0;
     border-radius: 0;
     background: none;
     box-shadow: none;
     width: 100%;
+    height: 100vh;
     height: 100dvh;
   }
   .phone::after { display: none; }
   .notch, .homeBar, .phoneHint { display: none; }
   canvas#game {
     width: 100%;
+    height: 100vh;
     height: 100dvh;
     border-radius: 0;
     aspect-ratio: auto;

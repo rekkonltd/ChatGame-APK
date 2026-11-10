@@ -58,8 +58,22 @@
     return audioCtxState.ctx;
   }
 
-  // предзагрузка реплик (не критично, если не загрузятся — молчим)
-  Object.entries(clips).forEach(([key, file]) => {
+  // на мобиле AudioContext нельзя запускать до касания — ждём первого жеста
+  let unlocked = false;
+  function unlockAudio() {
+    if (unlocked) return;
+    unlocked = true;
+    const a = audio();
+    if (a && a.state === 'suspended') a.resume();
+    Object.keys(clips).forEach((k) => { if (!buffers[k]) loadClip(k); });
+  }
+  ['pointerdown', 'touchstart', 'click'].forEach((ev) =>
+    window.addEventListener(ev, unlockAudio, { passive: true }));
+
+  // предзагрузка реплик (не критично, если не загружаются — молчим)
+  function loadClip(key) {
+    const file = clips[key];
+    if (!file) return;
     fetch(VOICE_DIR + file + '.mp3')
       .then((r) => (r.ok ? r.arrayBuffer() : null))
       .then((ab) => {
@@ -69,7 +83,7 @@
         a.decodeAudioData(ab, (buf) => { buffers[key] = buf; }, () => {});
       })
       .catch(() => {});
-  });
+  }
 
   let lastVoiceAt = 0;
   function playVoice(key, minGap) {
