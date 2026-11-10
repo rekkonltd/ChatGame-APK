@@ -1,0 +1,9 @@
+# зависимости и сборки
+node_modules/
+godot/build/
+godot/.godot/
+*.tmp
+
+# служебное
+.DS_Store
+Thumbs.db

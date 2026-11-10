@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#14171a">
+<title>THAN-DOR · прототип уровня 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="stage">
+  <aside class="side">
+    <h1>THAN-DOR<span>вторжение</span></h1>
+    <p class="tag">Прототип уровня 1 · портрет · одна рука</p>
+
+    <div class="hint">
+      <b>Как играть</b>
+      <ul>
+        <li><b>Тап по юниту</b> — выбрать, повторный тап — все такие же</li>
+        <li><b>Тап по земле</b> — приказ идти</li>
+        <li><b>Тап по ксениту</b> сборщиком — добывать</li>
+        <li><b>Перетаскивание</b> — камера, <b>щипок</b> — зум</li>
+        <li><b>ВОЙСКА</b> — заказ на заводе, <b>БАЗА</b> — постройки</li>
+        <li><b>ТЕХ</b> — две ветки: армия и экономика</li>
+        <li><b>ВСЕ ВОЙСКА</b> → <b>АТАКА</b> → тап по цели</li>
+      </ul>
+    </div>
+
+    <div class="hint">
+      <b>Проверить быстрее</b>
+      <ul>
+        <li><kbd>R</kbd> — заново</li>
+        <li><kbd>Пробел</kbd> — вся армия</li>
+        <li><kbd>Esc</kbd> — снять выделение</li>
+      </ul>
+    </div>
+
+    <div class="hint ok">
+      <b>Что это</b>
+      <p>Веб-прототип для проверки вида и управления. Логика (<code>js/sim.js</code>) отделена
+      от графики, чтобы перенестись в Godot 1:1.</p>
+    </div>
+
+    <label class="chk">
+      <input type="checkbox" id="turbo"> ускорить время ×4 (для теста)
+    </label>
+  </aside>
+
+  <main class="phoneWrap">
+    <div class="phone">
+      <div class="notch"></div>
+      <canvas id="game" width="390" height="844"></canvas>
+      <div class="homeBar"></div>
+    </div>
+    <p class="phoneHint">390 × 844 · масштаб подстраивается под окно</p>
+  </main>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/sim.js"></script>
+<script src="js/art.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/game.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
