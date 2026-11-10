@@ -1,0 +1,12 @@
+# зависимости и сборки
+node_modules/
+godot/build/
+godot/.godot/
+*.tmp
+
+# служебное
+.DS_Store
+Thumbs.db
+
+# промежуточные файлы сборки APK
+android-native/build/
