@@ -70,7 +70,10 @@
     };
 
     el.addEventListener('pointerdown', (e) => {
-      el.setPointerCapture(e.pointerId);
+      // setPointerCapture есть не во всех WebView — без него игра должна работать
+      if (el.setPointerCapture && e.pointerId !== undefined) {
+        try { el.setPointerCapture(e.pointerId); } catch (err) { /* не критично */ }
+      }
       const p = pos(e);
       this.pointer.down = true;
       this.pointer.dragged = false;
@@ -99,6 +102,11 @@
     });
 
     const end = (e) => {
+      if (el.releasePointerCapture && e.pointerId !== undefined) {
+        try { el.releasePointerCapture(e.pointerId); } catch (err) { /* не критично */ }
+      }
+      // страховка: если down пришёл на canvas, а up потерялся — pointerdown
+      // на документе (например, в старом WebView) вызовет onPress, но не onTap
       const p = pos(e);
       if (this.pointer.down && !this.pointer.dragged) this.onTap(p.x, p.y);
       this.pointer.down = false;
@@ -165,9 +173,14 @@
     if (this.techOpen) {
       const node = this.techHitTest(x, y);
       if (node) { this.tryResearch(node.id); return; }
-      if (x > L.field.w - 118 && y < 46) { this.techOpen = false; }
-      if (y > L.field.h - 60) this.techOpen = false;
-      return;
+      // кнопка «ЗАКРЫТЬ» — ровно там, где нарисована
+      if (x > L.field.w - 118 && y >= L.field.y && y <= L.field.y + 46) {
+        this.techOpen = false;
+        return;
+      }
+      this.techOpen = false;
+      // тап по нижней панели закрывает техдерево и сразу переключает вкладку
+      if (y <= L.field.y + L.field.h) return;
     }
 
     // верхний статус-бар: пауза
@@ -226,9 +239,13 @@
     return x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h;
   };
 
+  // Экранная точка → мировые координаты.
+  // Важно: игровое поле начинается ниже статус-бара и имеет свою высоту,
+  // поэтому переводим через прямоугольник поля, а не через весь экран.
   Game.prototype.worldAt = function (x, y) {
     const v = this.viewSize();
-    return A.toWorld(this.cam, { w: v.w, h: v.h }, x, y);
+    const L = this.layout || UI.printLayout(this.ctx, v);
+    return A.toWorld(this.cam, { w: v.w, h: L.field.h }, x, y - L.field.y);
   };
 
   Game.prototype.entityAt = function (wx, wy) {
@@ -261,6 +278,7 @@
         } else {
           this.selection = e.id;
           this.selectedType = e.type;
+          if (this.multiSelection && this.multiSelection.indexOf(e.id) < 0) this.multiSelection = null;
         }
         this.lastTapId = e.id;
         return;
@@ -280,33 +298,40 @@
       return;
     }
 
-    // пустая земля
-    if (this.selection) {
-      const ids = this.selectionIds();
-      if (ids.length) {
-        const mode = this.attackMode ? 'attack' : 'move';
-        this.sim.issueOrder('player', ids, w.x, w.y, mode);
-        if (this.opts.onOrder) this.opts.onOrder(mode);
+    // пустая земля: сначала проверяем, не тапнули ли по залежи ксенита
+    const ids = this.activeIds();
+    const selected = this.sim.findById(this.selection);
+    const tx = Math.floor(w.x / TS), ty = Math.floor(w.y / TS);
+    const tileIdx = ty * C.BALANCE.worldW + tx;
+    const onXenite = tx >= 0 && ty >= 0 && tx < C.BALANCE.worldW && ty < C.BALANCE.worldH &&
+      this.sim.tiles[tileIdx] === C.TILE.XENITE;
+
+    if (ids.length && onXenite) {
+      // сборщикам — добыча, остальным — просто идти к залежи
+      const workers = ids.filter((id) => {
+        const u = this.sim.findById(id);
+        return u && u.kind === 'unit' && u.def.role === 'worker';
+      });
+      if (workers.length) {
+        this.sim.orderHarvest('player', workers, tx, ty);
+        if (this.opts.onOrder) this.opts.onOrder('harvest');
+        this.flash('Добыча ксенита');
         this.pressEffect(x, y);
-        this.attackMode = false;
         return;
       }
     }
 
-    // добыча: если выделен сборщик и тапнули по ксениту — приказ добывать
-    if (this.selection) {
-      const sel = this.sim.findById(this.selection);
-      if (sel && sel.def.role === 'worker') {
-        const tx = Math.floor(w.x / TS), ty = Math.floor(w.y / TS);
-        const i = ty * C.BALANCE.worldW + tx;
-        if (this.sim.tiles[i] === C.TILE.XENITE) {
-          this.sim.orderHarvest('player', [sel.id], tx, ty);
-          if (this.opts.onOrder) this.opts.onOrder('harvest');
-          this.flash('Добыча ксенита');
-          return;
-        }
-      }
+    if (ids.length) {
+      const mode = this.attackMode ? 'attack' : 'move';
+      this.sim.issueOrder('player', ids, w.x, w.y, mode);
+      if (this.opts.onOrder) this.opts.onOrder(mode);
+      this.pressEffect(x, y);
+      this.attackMode = false;
+      return;
     }
+
+    // тап по пустой карте без выделения — просто снять фокус
+    void selected;
     this.selection = null;
     this.selectedType = null;
   };

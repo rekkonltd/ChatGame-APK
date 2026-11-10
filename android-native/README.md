@@ -1,6 +1,6 @@
 # THAN-DOR — тестовый APK (нативная оболочка)
 
-Готовый файл: **`artifacts/thandor-debug-0.1.0.apk`** (226 КБ).
+Готовый файл: **`artifacts/thandor-debug-0.1.1.apk`** (226 КБ).
 
 Это не Godot-сборка, а нативная оболочка на WebView: внутрь APK упакован тот же
 HTML5-прототип из `prototype/`. Сделано так потому, что Godot-экспорт требует
@@ -25,7 +25,7 @@ HTML5-прототип из `prototype/`. Сделано так потому, ч
 |---|---|
 | Package | `com.thandor.vtorzhenie` |
 | Название | THAN-DOR |
-| Версия | 0.1.0 (code 1) |
+| Версия | 0.1.1 (code 2) |
 | minSdk | 21 (Android 5.0) |
 | targetSdk | 33 (Android 13) |
 | Ориентация | портрет, зафиксирована |
@@ -34,12 +34,22 @@ HTML5-прототип из `prototype/`. Сделано так потому, ч
 
 ---
 
+## Если обновляешься с 0.1.0
+
+Версия 0.1.1 собрана с другим ключом подписи, поэтому поверх старой не встанет.
+Сначала удали старую:
+
+```bash
+adb uninstall com.thandor.vtorzhenie
+adb install -r artifacts/thandor-debug-0.1.1.apk
+```
+
 ## Как установить на телефон
 
 ### Способ 1: через adb (быстрее)
 
 ```bash
-adb install -r artifacts/thandor-debug-0.1.0.apk
+adb install -r artifacts/thandor-debug-0.1.1.apk
 ```
 
 Если ругается на установку из неизвестного источника — включить

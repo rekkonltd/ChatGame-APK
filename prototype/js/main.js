@@ -23,13 +23,13 @@
 
   // логический размер канваса = CSS-размер, поэтому дальше работаем в CSS-px
   const game = new window.Game(canvas, { onAnnounce: () => {} });
-  canvas.clientWidth = canvas.getBoundingClientRect().width;
   game.viewSize = function () {
     const r = canvas.getBoundingClientRect();
     return { w: r.width, h: r.height };
   };
   game.resize = resize;
 
+  window.__game = game;      // для отладки и автотестов
   game.bindInput();
   game.focusOn(window.NOVA.LEVEL.playerHC.tx * 48, window.NOVA.LEVEL.playerHC.ty * 48);
 
@@ -60,17 +60,7 @@
 
   // на мобиле AudioContext нельзя запускать до касания — ждём первого жеста
   let unlocked = false;
-  function unlockAudio() {
-    if (unlocked) return;
-    unlocked = true;
-    const a = audio();
-    if (a && a.state === 'suspended') a.resume();
-    Object.keys(clips).forEach((k) => { if (!buffers[k]) loadClip(k); });
-  }
-  ['pointerdown', 'touchstart', 'click'].forEach((ev) =>
-    window.addEventListener(ev, unlockAudio, { passive: true }));
-
-  // предзагрузка реплик (не критично, если не загружаются — молчим)
+  let clipsLoaded = false;
   function loadClip(key) {
     const file = clips[key];
     if (!file) return;
@@ -80,16 +70,32 @@
         if (!ab) return;
         const a = audio();
         if (!a) return;
-        a.decodeAudioData(ab, (buf) => { buffers[key] = buf; }, () => {});
+        try {
+          a.decodeAudioData(ab, (buf) => { buffers[key] = buf; }, () => {});
+        } catch (e) { /* старый WebView без промисов — молчим */ }
       })
       .catch(() => {});
   }
+  function unlockAudio() {
+    if (unlocked) return;
+    unlocked = true;
+    const a = audio();
+    if (a && a.state === 'suspended') a.resume();
+    if (!clipsLoaded) {
+      clipsLoaded = true;
+      Object.keys(clips).forEach((k) => { if (!buffers[k]) loadClip(k); });
+    }
+  }
+  ['pointerdown', 'touchstart', 'click'].forEach((ev) =>
+    window.addEventListener(ev, unlockAudio, { passive: true }));
+
+  // реплики грузятся по первому касанию — иначе мобильный браузер блокирует звук
 
   let lastVoiceAt = 0;
   function playVoice(key, minGap) {
     if (!audioCtxState.voicesOn || audioCtxState.muted) return;
     const buf = buffers[key];
-    if (!buf) return;
+    if (!buf || !buf.duration) return;
     const now = performance.now();
     if (now - lastVoiceAt < (minGap === undefined ? 1200 : minGap)) return;
     lastVoiceAt = now;
@@ -159,10 +165,19 @@
   function frame(now) {
     let dt = (now - last) / 1000;
     last = now;
+    if (!(dt > 0)) dt = 0.016;        // первый кадр и защита от NaN
     if (dt > 0.25) dt = 0.25;
     if (turbo && turbo.checked) dt *= 4;
-    game.update(dt);
-    game.draw();
+    try {
+      game.update(dt);
+      game.draw();
+    } catch (err) {
+      // одна ошибка отрисовки не должна навсегда остановить игру
+      if (!window.__lastRenderError) {
+        window.__lastRenderError = err;
+        if (window.console) console.error('render error:', err);
+      }
+    }
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);

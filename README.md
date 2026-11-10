@@ -38,21 +38,26 @@ python3 -m http.server 8080
 
 ---
 
-## Проверить логику
+## Проверить, что игра запускается
 
 ```bash
+npm i jsdom @napi-rs/canvas   # один раз
+node tools/smoke-dom.js       # страница в реальном DOM: запуск, отрисовка, тапы
 node prototype/test/sim.test.js
 ```
 
-Симуляция не зависит от DOM, поэтому тестируется в Node: экономика, производство,
-технологии, бой, туман войны, пути, победа/поражение, ИИ.
+- `tools/smoke-dom.js` — поднимает `index.html` в jsdom с настоящим canvas и прогоняет
+  запуск, отрисовку кадров и тапы по всем зонам интерфейса. Ловит ошибки, из-за которых
+  игра показывает пустой экран.
+- `prototype/test/sim.test.js` — логика: экономика, производство, технологии, бой,
+  туман войны, пути, победа/поражение, ИИ.
 
 ---
 
 ## Установить тестовый APK
 
 ```bash
-adb install -r artifacts/thandor-debug-0.1.0.apk
+adb install -r artifacts/thandor-debug-0.1.1.apk
 ```
 
 Или просто скинуть файл на телефон и открыть. Package `com.thandor.vtorzhenie`,

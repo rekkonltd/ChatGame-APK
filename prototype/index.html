@@ -69,12 +69,24 @@ if (!Object.entries) {
     <div class="phone">
       <div class="notch"></div>
       <canvas id="game" width="390" height="844"></canvas>
+      <div id="boot-error" style="display:none;position:absolute;left:12px;right:12px;top:50%;transform:translateY(-50%);
+        padding:12px;border-radius:4px;background:#3a1f18;border:1px solid #a4543c;color:#f0c0a8;
+        font:600 13px system-ui,sans-serif;z-index:5"></div>
       <div class="homeBar"></div>
     </div>
     <p class="phoneHint">390 × 844 · масштаб подстраивается под окно</p>
   </main>
 </div>
 
+<script>
+/* Если скрипт не загрузился (или упал) — сказать об этом, а не показывать пустой экран */
+window.addEventListener('error', function (e) {
+  var box = document.getElementById('boot-error');
+  if (!box) return;
+  box.style.display = 'block';
+  box.textContent = 'Ошибка запуска: ' + (e.message || 'не удалось загрузить скрипт');
+});
+</script>
 <script src="js/config.js"></script>
 <script src="js/sim.js"></script>
 <script src="js/art.js"></script>
